@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overleaf
+  namespace: latex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: overleaf
+  template:
+    metadata:
+      labels:
+        app: overleaf
+    spec:
+      containers:
+      - name: overleaf
+        image: sharelatex/sharelatex:latest
+        envFrom:
+        - configMapRef:
+            name: sharelatex-config
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: overleaf
+  namespace: latex
+spec:
+  selector:
+    app: overleaf
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

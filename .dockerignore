@@ -1,0 +1,17 @@
+# Docker构建配置文件
+# 用于优化构建过程和缓存
+
+# 忽略不必要的文件
+**/.git
+**/.gitignore
+**/README.md
+**/Dockerfile
+**/docker-compose*
+**/.dockerignore
+**/node_modules
+**/npm-debug.log
+**/coverage
+**/.nyc_output
+**/.DS_Store
+**/*.swp
+**/*.swo

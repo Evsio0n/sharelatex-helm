@@ -1,0 +1,127 @@
+name: Daily Docker Build
+
+on:
+  # 每天UTC时间02:00自动触发（北京时间10:00）
+  schedule:
+    - cron: '0 2 * * *'
+  # 允许手动触发
+  workflow_dispatch:
+  # 推送到main分支时也触发
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/daily-build.yml'
+
+env:
+  IMAGE_NAME: sharelatex-custom
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=schedule,pattern={{date 'YYYYMMDD'}}
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{date 'YYYYMMDD'}}-
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Create build summary
+      run: |
+        echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Image:** ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Save image as tar file
+      run: |
+        # 拉取刚构建的镜像并保存为tar文件
+        IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+        docker pull $IMAGE_TAG
+        docker save $IMAGE_TAG -o sharelatex-image-$(date +%Y%m%d).tar
+        
+        # 压缩以节省空间
+        gzip sharelatex-image-$(date +%Y%m%d).tar
+
+    - name: Upload Docker image as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sharelatex-docker-image-${{ github.run_number }}
+        path: sharelatex-image-*.tar.gz
+        retention-days: 30
+
+    - name: Generate build report
+      run: |
+        cat > build-report.md << EOF
+        # ShareLaTeX Docker Build Report
+        
+        **Build Date:** $(date)
+        **Workflow Run:** ${{ github.run_number }}
+        **Commit:** ${{ github.sha }}
+        **Branch:** ${{ github.ref_name }}
+        
+        ## Image Details
+        - **Registry:** ${{ env.REGISTRY }}
+        - **Repository:** ${{ github.repository }}
+        - **Image Name:** ${{ env.IMAGE_NAME }}
+        - **Tags:** ${{ steps.meta.outputs.tags }}
+        
+        ## Build Status
+        ✅ Docker image built successfully
+        ✅ Image pushed to registry
+        ✅ Artifacts uploaded
+        
+        ## Usage
+        To use this image:
+        \`\`\`bash
+        docker pull ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:$(date +%Y%m%d)
+        \`\`\`
+        
+        Or download the artifact and load:
+        \`\`\`bash
+        docker load -i sharelatex-image-$(date +%Y%m%d).tar.gz
+        \`\`\`
+        EOF
+
+    - name: Upload build report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-report-${{ github.run_number }}
+        path: build-report.md
+        retention-days: 90

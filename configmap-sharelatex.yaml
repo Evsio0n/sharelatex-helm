@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: latex
+  labels: {}
+  name: sharelatex-config
+data:
+  OVERLEAF_SITE_URL: https://overleaf.example.com
+  OVERLEAF_BEHIND_PROXY: "true"
+  EMAIL_CONFIRMATION_DISABLED: "true"     # 禁用邮箱验证功能
+  ENABLE_CONVERSIONS: "true"
+  ENABLED_LINKED_FILE_TYPES: project_file,project_output_file
+  EXTERNAL_AUTH: none
+  OVERLEAF_APP_NAME: RAIDS Lab Overleaf   # 打上实验室 LOGO
+  OVERLEAF_MONGO_URL: mongodb://mongo-mongodb.latex.svc.cluster.local/sharelatex # Kubernetes 服务
+  OVERLEAF_REDIS_HOST: redis-master.latex.svc.cluster.local # Kubernetes 服务
+  REDIS_HOST: redis-master.latex.svc.cluster.local # Kubernetes 服务
+  REDIS_PORT: "6379"
