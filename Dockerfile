@@ -60,5 +60,5 @@ RUN echo "=== 安装验证 ===" && \
     latex --version | head -n1 && \
     xelatex --version | head -n1 && \
     echo "已安装的TeX Live包数量:" && \
-    tlmgr list --installed | wc -l && \
+    tlmgr list --only-installed | wc -l && \
     echo "=== amd64构建完成 ===" 

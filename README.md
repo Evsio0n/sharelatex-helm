@@ -6,7 +6,9 @@
 
 项目使用了[Haixing-Hu/latex-chinese-fonts](https://github.com/Haixing-Hu/latex-chinese-fonts)的字体文件.
 
+## 部署教程
 
+[实验在 Kubernetes 上部署 ShareLaTeX 并启用中文支持](https://evsio0n.com/archives/95/)
 
 ## 🔄 自动构建
 
@@ -26,7 +28,6 @@
    - 标签格式：`YYYYMMDD` (日期标签)
 
 2. **Artifacts**：
-   - `sharelatex-docker-image-{run_number}`：压缩的Docker镜像tar文件 (amd64)
    - `build-report-{run_number}`：构建报告文档
 
 ## 🚀 使用方法
@@ -41,21 +42,8 @@ docker pull --platform linux/amd64 ghcr.io/你的用户名/helm-sharelatex/share
 docker pull --platform linux/amd64 ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:20250725
 ```
 
-### 2. 从Artifacts下载镜像
 
-1. 访问项目的GitHub Actions页面
-2. 选择对应的构建运行
-3. 下载 `sharelatex-docker-image-*` artifact (amd64)
-4. 解压并加载镜像：
-
-```bash
-# 解压
-gunzip sharelatex-image-YYYYMMDD.tar.gz
-
-docker load -i sharelatex-image-YYYYMMDD.tar
-```
-
-### 3. 在Kubernetes中使用
+### 2. 在Kubernetes中使用
 
 更新你的Helm values文件中的镜像地址：
 

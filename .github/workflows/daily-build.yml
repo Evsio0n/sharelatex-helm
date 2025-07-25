@@ -72,22 +72,6 @@ jobs:
         echo "- **Build Date:** $(date)" >> $GITHUB_STEP_SUMMARY
         echo "- **Commit SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
 
-    - name: Save image as tar file
-      run: |
-        # 拉取刚构建的镜像并保存为tar文件
-        IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
-        docker pull $IMAGE_TAG
-        docker save $IMAGE_TAG -o sharelatex-image-$(date +%Y%m%d).tar
-        
-        # 压缩以节省空间
-        gzip sharelatex-image-$(date +%Y%m%d).tar
-
-    - name: Upload Docker image as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: sharelatex-docker-image-${{ github.run_number }}
-        path: sharelatex-image-*.tar.gz
-        retention-days: 30
 
     - name: Generate build report
       run: |
@@ -116,10 +100,6 @@ jobs:
         docker pull ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:$(date +%Y%m%d)
         \`\`\`
         
-        Or download the artifact and load:
-        \`\`\`bash
-        docker load -i sharelatex-image-$(date +%Y%m%d).tar.gz
-        \`\`\`
         EOF
 
     - name: Upload build report as artifact
