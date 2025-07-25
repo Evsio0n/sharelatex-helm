@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 # 安装 Microsoft 字体
-RUN echo "yes" | apt install -y --reinstall ttf-mscorefonts-installer
+# RUN echo "yes" | apt install -y --reinstall ttf-mscorefonts-installer
 
 RUN echo "中文字体仅供个人学习研究使用。若有无意中侵权, 请立即联系我删除。"
 # 安装中文字体库
