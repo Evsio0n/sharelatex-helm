@@ -8,9 +8,21 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     ca-certificates \
-    texlive-full \
+    latex-cjk-all \
+    texlive-lang-chinese \
+    texlive-lang-english \
+    git \
     && rm -rf /var/lib/apt/lists/*
+# 安装 Microsoft 字体
+RUN echo "yes" | apt install -y --reinstall ttf-mscorefonts-installer
 
+RUN echo "中文字体仅供个人学习研究使用。若有无意中侵权, 请立即联系我删除。"
+# 安装中文字体库
+RUN git clone https://github.com/Haixing-Hu/latex-chinese-fonts /usr/share/fonts/opentype/latex-chinese-fonts -b master
+
+
+# 更新 Font Cache
+RUN fc-cache -fv
 # 2. 配置 TeX Live 包管理器（amd64专用优化）
 RUN echo "配置TeX Live仓库..." && \
     tlmgr update --self

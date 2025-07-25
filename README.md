@@ -1,6 +1,12 @@
-# ShareLaTeX Helm Chart with Auto-Build
+# ShareLaTeX Helm Chart with Auto-Build (amd64)
 
 这个项目包含了一个自定义的ShareLaTeX Docker镜像以及对应的Kubernetes Helm配置。
+
+## 中文字体
+
+项目使用了[Haixing-Hu/latex-chinese-fonts](https://github.com/Haixing-Hu/latex-chinese-fonts)的字体文件.
+
+
 
 ## 🔄 自动构建
 
@@ -16,37 +22,36 @@
 每次构建会生成以下产物：
 
 1. **Docker镜像**：推送到GitHub Container Registry
-   - 镜像地址：`ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom`
+   - 镜像地址：`ghcr.io/evsio0n/helm-sharelatex/sharelatex-custom`
    - 标签格式：`YYYYMMDD` (日期标签)
 
 2. **Artifacts**：
-   - `sharelatex-docker-image-{run_number}`：压缩的Docker镜像tar文件
+   - `sharelatex-docker-image-{run_number}`：压缩的Docker镜像tar文件 (amd64)
    - `build-report-{run_number}`：构建报告文档
 
 ## 🚀 使用方法
 
-### 1. 从Registry拉取镜像
+### 1. 从Registry拉取镜像 (amd64)
 
 ```bash
-# 拉取最新的每日构建镜像
-docker pull ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:$(date +%Y%m%d)
+# 拉取最新的每日构建镜像 (amd64)
+docker pull --platform linux/amd64 ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:$(date +%Y%m%d)
 
 # 或者拉取特定日期的镜像
-docker pull ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:20250725
+docker pull --platform linux/amd64 ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:20250725
 ```
 
 ### 2. 从Artifacts下载镜像
 
 1. 访问项目的GitHub Actions页面
 2. 选择对应的构建运行
-3. 下载 `sharelatex-docker-image-*` artifact
+3. 下载 `sharelatex-docker-image-*` artifact (amd64)
 4. 解压并加载镜像：
 
 ```bash
 # 解压
 gunzip sharelatex-image-YYYYMMDD.tar.gz
 
-# 加载到Docker
 docker load -i sharelatex-image-YYYYMMDD.tar
 ```
 
@@ -56,8 +61,10 @@ docker load -i sharelatex-image-YYYYMMDD.tar
 
 ```yaml
 image:
-  repository: ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom
+  repository: ghcr.io/evsio0n/helm-sharelatex/sharelatex-custom
   tag: "20250725"  # 使用对应日期的标签
+nodeSelector:
+  kubernetes.io/arch: amd64  # 确保调度到amd64节点
 ```
 
 ## 📝 自定义配置
@@ -75,21 +82,10 @@ schedule:
 
 可以在workflow中添加通知步骤，例如发送到Slack或邮件。
 
-### 多平台构建
-
-当前配置支持 `linux/amd64` 和 `linux/arm64` 平台，可以根据需要调整。
 
 ## 🛠 开发
 
-### 本地测试构建
 
-```bash
-# 构建镜像
-docker build -t sharelatex-custom .
-
-# 测试运行
-docker run -d -p 80:80 sharelatex-custom
-```
 
 ### 手动推送镜像
 
@@ -97,8 +93,8 @@ docker run -d -p 80:80 sharelatex-custom
 # 登录到GitHub Container Registry
 echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
-# 构建并推送
-docker build -t ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:manual .
+# 构建并推送 (amd64)
+docker build --platform linux/amd64 -t ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:manual .
 docker push ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:manual
 ```
 
@@ -121,5 +117,5 @@ docker push ghcr.io/你的用户名/helm-sharelatex/sharelatex-custom:manual
 - Packages权限（用于推送到Container Registry）
 
 ## 📄 许可证
+需要留意 [微软字体许可FAQ](https://learn.microsoft.com/en-us/typography/fonts/font-faq)
 
-请根据你的需要添加合适的许可证文件。
